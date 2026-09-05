@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garden AI Designer · Bloom & Bonsai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="style.css?v=44.0">
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{ font-family:'Inter',sans-serif; background:#faf8f2; color:#23301f; min-height:100vh; }
+
+/* ── Hero Section ── */
+.designer-hero{ text-align:center; padding:3rem 1.5rem 2rem; max-width:850px; margin:0 auto; }
+.designer-hero .badge{ background:rgba(23,72,47,.08); color:#17482f; padding:.4rem 1.2rem; border-radius:999px; font-weight:700; font-size:.82rem; text-transform:uppercase; letter-spacing:.6px; display:inline-block; margin-bottom:1rem; }
+.designer-hero h1{ font-family:'Playfair Display',Georgia,serif; font-size:2.6rem; color:#17482f; margin-bottom:.6rem; }
+.designer-hero h1 span{ color:#c9a227; }
+.designer-hero p{ color:#5c6b58; font-size:1.05rem; line-height:1.6; }
+
+/* ── Main Layout Grid ── */
+.designer-container{ max-width:1150px; margin:0 auto; padding:0 1.5rem 4rem; display:grid; grid-template-columns:1fr 1fr; gap:2.5rem; }
+@media(max-width:900px){ .designer-container{ grid-template-columns:1fr; } }
+
+/* ── Form Card ── */
+.designer-card{ background:#fff; border:1px solid #e7e2d3; border-radius:24px; padding:2rem; box-shadow:0 12px 35px rgba(14,42,26,.06); }
+.designer-card h2{ font-family:'Playfair Display',Georgia,serif; color:#17482f; font-size:1.5rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:10px; }
+
+.form-group{ margin-bottom:1.4rem; }
+.form-group label{ display:block; font-weight:600; color:#23301f; margin-bottom:.5rem; font-size:.92rem; }
+
+/* Upload Area */
+.image-dropzone{ border:2px dashed #17482f; border-radius:16px; background:#f6f9f6; padding:1.8rem; text-align:center; cursor:pointer; transition:.25s; }
+.image-dropzone:hover{ background:#edf4ee; border-color:#c9a227; }
+.image-dropzone i{ font-size:2.2rem; color:#17482f; margin-bottom:.6rem; }
+.image-dropzone p{ font-size:.9rem; color:#3d4a3a; font-weight:600; }
+.image-dropzone span{ font-size:.78rem; color:#7c8878; }
+#gardenImage{ display:none; }
+#previewArea{ margin-top:1rem; text-align:center; display:none; }
+#previewImg{ max-width:100%; max-height:220px; border-radius:14px; object-fit:cover; box-shadow:0 6px 20px rgba(0,0,0,.1); }
+
+/* Style Selector Cards */
+.style-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; }
+.style-option{ border:2px solid #e7e2d3; border-radius:14px; overflow:hidden; cursor:pointer; transition:.25s; background:#fff; text-align:center; padding-bottom:.8rem; }
+.style-option:hover{ border-color:#17482f; transform:translateY(-2px); }
+.style-option.selected{ border-color:#17482f; background:#f2f7ef; box-shadow:0 0 0 3px rgba(23,72,47,.15); }
+.style-option img{ width:100%; height:110px; object-fit:cover; display:block; }
+.style-option span{ display:block; margin-top:.5rem; font-weight:700; font-size:.88rem; color:#17482f; }
+
+/* Textarea & Select */
+textarea, select{ width:100%; padding:.8rem 1rem; border:1px solid #d8d3c2; border-radius:12px; font-family:inherit; font-size:.92rem; background:#fff; color:#23301f; transition:.2s; }
+textarea:focus, select:focus{ outline:none; border-color:#17482f; box-shadow:0 0 0 3px rgba(23,72,47,.1); }
+
+.btn-generate{ width:100%; background:#17482f; color:#fff; border:none; padding:1rem; border-radius:999px; font-size:1rem; font-weight:700; cursor:pointer; transition:.25s; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 6px 20px rgba(23,72,47,.25); }
+.btn-generate:hover{ background:#0e2a1a; transform:translateY(-2px); }
+
+/* ── Result Card ── */
+.result-card{ background:#fff; border:1px solid #e7e2d3; border-radius:24px; padding:2rem; box-shadow:0 12px 35px rgba(14,42,26,.06); min-height:450px; display:flex; flex-direction:column; }
+.result-card h2{ font-family:'Playfair Display',Georgia,serif; color:#17482f; font-size:1.5rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:10px; }
+.placeholder-result{ text-align:center; margin:auto 0; color:#7c8878; padding:2rem 1rem; }
+.placeholder-result i{ font-size:3.5rem; color:#c9a227; margin-bottom:1rem; display:block; }
+
+/* Generated Plant Cards */
+.recommended-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:1rem; margin-top:1rem; }
+.rec-plant{ background:#f6f3ea; border-radius:14px; overflow:hidden; padding:.6rem; text-align:center; font-size:.85rem; border:1px solid #ece7d9; }
+.rec-plant img{ width:100%; height:95px; object-fit:cover; border-radius:10px; margin-bottom:.4rem; }
+.rec-plant b{ display:block; color:#17482f; }
+.rec-plant span{ color:#c9a227; font-weight:600; font-size:.78rem; }
+</style>
+</head>
+<body>
+
+<!-- ═══ CENTERED PREMIUM NAVBAR ═══ -->
+<header class="navbar premium">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">Bloom <span>&amp;</span> Bonsai</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="mygarden.html">My Garden</a></li>
+      <li><a href="gardendesigner.html" class="active">Garden AI</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="wishlist.html" class="cart-link" style="margin-right:10px;">Wishlist <span class="cart-badge wishlist-count-badge" id="wishlistCount" style="background:#e74c3c;">0</span></a>
+      <a href="cart.html" class="cart-link">Cart <span class="cart-badge" id="cartCount">0</span></a>
+      <a href="login.html" class="btn-login" id="loginBtn">Login</a>
+      <a href="register.html" class="btn-signup" id="signupBtn">Sign Up</a>
+      <div class="user-menu" id="userMenu" style="display:none;align-items:center;gap:10px;">
+        <i class="fas fa-user-circle"></i>
+        <span id="userName">User</span>
+        <a href="#" id="logoutBtn" class="btn-mini" style="font-size:0.8rem;">Logout</a>
+      </div>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ HERO SECTION ═══ -->
+<section class="designer-hero">
+  <span class="badge">✨ AI Landscape Architecture</span>
+  <h1>Design Your Dream <span>Garden & Balcony</span></h1>
+  <p>Upload a photo of your balcony, patio, or yard. Our AI landscape planner will recommend plant layouts, lighting placement, and matching bonsai species customized for your space.</p>
+</section>
+
+<!-- ═══ DESIGNER INTERFACE ═══ -->
+<main class="designer-container">
+  <!-- Left Column: Inputs & Style Selection -->
+  <div style="display:flex;flex-direction:column;gap:2rem;">
+    <!-- ☀️ SUNLIGHT & ROOM ORIENTATION QUIZ WIDGET -->
+    <div class="designer-card" style="background:#fdfcf7;border:1px solid #c9a227;">
+      <h2 style="font-size:1.35rem;color:#17482f;"><i class="fas fa-sun" style="color:#c9a227;"></i> Room Sunlight &amp; Orientation Quiz</h2>
+      <p style="font-size:0.88rem;color:#555;margin-bottom:1.2rem;">Don't know which plants fit your room? Take this 10-second quiz to get instant recommendations!</p>
+      
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label style="font-size:0.85rem;">Window / Space Orientation:</label>
+        <select id="quizOrientation" style="padding:8px 12px;font-size:0.88rem;">
+          <option value="east">East-facing (Bright Morning Sun)</option>
+          <option value="south">South-facing (Direct Sun 6+ Hours)</option>
+          <option value="west">West-facing (Afternoon Sun)</option>
+          <option value="north">North-facing (Low / Indirect Light)</option>
+          <option value="balcony">Outdoor Open Balcony / Garden</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label style="font-size:0.85rem;">Daily Natural Light Hours:</label>
+        <select id="quizHours" style="padding:8px 12px;font-size:0.88rem;">
+          <option value="2-4">2 – 4 Hours Daily</option>
+          <option value="4-6">4 – 6 Hours Daily</option>
+          <option value="6+">6+ Hours Direct Sunlight</option>
+          <option value="low">Less than 2 Hours (Shaded / Low Light)</option>
+        </select>
+      </div>
+
+      <button type="button" onclick="evaluateSunlightQuiz()" style="width:100%;background:#c9a227;color:#fff;border:none;padding:10px;border-radius:999px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 14px rgba(201,162,39,0.25);">
+        ⚡ Calculate &amp; Suggest Plants
+      </button>
+
+      <div id="quizResultsBox" style="display:none;margin-top:1rem;background:#fff;padding:12px;border-radius:12px;border:1px solid #e7e2d3;">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+
+    <!-- Garden Parameters Form -->
+    <div class="designer-card">
+      <h2><i class="fas fa-magic" style="color:#c9a227;"></i> Garden Parameters</h2>
+
+      <form id="designerForm">
+        <!-- Image Upload -->
+        <div class="form-group">
+          <label>1. Upload Space Photo (Optional)</label>
+          <div class="image-dropzone" onclick="document.getElementById('gardenImage').click()">
+            <i class="fas fa-camera-retro"></i>
+            <p>Click to upload your room, balcony or garden photo</p>
+            <span>JPG, PNG, WEBP — Max 10MB</span>
+          </div>
+          <input type="file" id="gardenImage" accept="image/*">
+          <div id="previewArea">
+            <img id="previewImg" alt="Space preview">
+          </div>
+        </div>
+
+        <!-- Redesign Preference Mode Selector -->
+        <div class="form-group">
+          <label>2. Space Transformation Preference</label>
+          <input type="hidden" id="designMode" value="enhance">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="mode-card selected" id="modeCardEnhance" onclick="selectMode('enhance')" style="border:2px solid #17482f;background:#f2f7ef;border-radius:14px;padding:12px;cursor:pointer;text-align:center;transition:.2s;">
+              <i class="fas fa-couch" style="font-size:1.4rem;color:#17482f;margin-bottom:4px;"></i>
+              <b style="display:block;font-size:0.85rem;color:#17482f;">Enhance Existing</b>
+              <span style="font-size:0.75rem;color:#555;display:block;">Keep furniture/pots &amp; layer plants around them</span>
+            </div>
+            <div class="mode-card" id="modeCardClean" onclick="selectMode('clean_slate')" style="border:2px solid #e7e2d3;background:#fff;border-radius:14px;padding:12px;cursor:pointer;text-align:center;transition:.2s;">
+              <i class="fas fa-broom" style="font-size:1.4rem;color:#c9a227;margin-bottom:4px;"></i>
+              <b style="display:block;font-size:0.85rem;color:#17482f;">Clean-Slate Redesign</b>
+              <span style="font-size:0.75rem;color:#555;display:block;">Clear old clutter &amp; renovate space from scratch</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Garden Style Selection Dropdown -->
+        <div class="form-group">
+          <label>3. Choose Aesthetic Style</label>
+          <select id="designStyle" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid #c9a227;font-size:0.92rem;background:#fff;color:#17482f;font-weight:600;cursor:pointer;">
+            <option value="tropical">🌺 Tropical Oasis (Lush Palms &amp; Vibrant Flowers)</option>
+            <option value="bonsai">⛩️ Zen Bonsai (Stone Sanctuary &amp; Japanese Pines)</option>
+            <option value="minimalist">🌿 Minimalist Modern (Clean Lines &amp; Terracotta Pots)</option>
+            <option value="maximalist">🌸 Lush Cottage (Dense Blooming Perennials)</option>
+          </select>
+        </div>
+
+        <!-- Description Notes -->
+        <div class="form-group">
+          <label>4. Describe Your Space &amp; Preferences</label>
+          <textarea id="designPrompt" rows="3" placeholder="e.g. Small north-facing balcony with 3 hours of direct sunlight, need low-maintenance indoor plants..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-generate" id="genBtn">
+          <i class="fas fa-sparkles"></i> Generate AI Layout Plan
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right Column: Interactive Results -->
+  <div class="result-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:1.2rem;">
+      <h2 style="margin:0;"><i class="fas fa-compass" style="color:#17482f;"></i> Personalized Layout Plan</h2>
+      <div id="exportActionBtns" style="display:none;gap:8px;">
+        <button onclick="exportGardenPNG()" style="background:#17482f;color:#fff;border:none;padding:6px 14px;border-radius:999px;font-size:0.78rem;font-weight:700;cursor:pointer;">
+          <i class="fas fa-camera"></i> Save PNG Image
+        </button>
+        <button onclick="exportGardenPDF()" style="background:#c9a227;color:#fff;border:none;padding:6px 14px;border-radius:999px;font-size:0.78rem;font-weight:700;cursor:pointer;">
+          <i class="fas fa-file-pdf"></i> Export PDF Plan
+        </button>
+      </div>
+    </div>
+    <div id="designerResult" style="flex:1;display:flex;flex-direction:column;">
+      <div class="placeholder-result">
+        <i class="fas fa-drafting-compass"></i>
+        <h3 style="color:#17482f;margin-bottom:.4rem;">Your AI Garden Plan Will Appear Here</h3>
+        <p>Select your preferred garden style on the left and click <strong>Generate AI Layout Plan</strong> to receive a tailored layout, plant list, and care schedule.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="script.js?v=43.0"></script>
+<script>
+function selectMode(mode) {
+  document.getElementById('designMode').value = mode;
+  const cardEnhance = document.getElementById('modeCardEnhance');
+  const cardClean = document.getElementById('modeCardClean');
+  if (mode === 'enhance') {
+    cardEnhance.style.borderColor = '#17482f';
+    cardEnhance.style.background = '#f2f7ef';
+    cardClean.style.borderColor = '#e7e2d3';
+    cardClean.style.background = '#fff';
+  } else {
+    cardClean.style.borderColor = '#17482f';
+    cardClean.style.background = '#f2f7ef';
+    cardEnhance.style.borderColor = '#e7e2d3';
+    cardEnhance.style.background = '#fff';
+  }
+}
+
+function selectStyle(el, style) {
+  document.querySelectorAll('.style-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('designStyle').value = style;
+}
+
+document.getElementById('gardenImage').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      document.getElementById('previewImg').src = evt.target.result;
+      document.getElementById('previewArea').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+</script>
+</body>
+</html>
